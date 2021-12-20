@@ -12,13 +12,12 @@ api = Api(app)
 
 class Item(Resource):
     def get(self, name):
-        for item in items:
-            if item['name'] == name:
-                return item
-        return {'status': 'no such item!'}, 404
-
+        item = filter(lambda x: x['name'] == name, items)
+        return next(item, None), 200 if item else 404
 
     def post(self, name):
+        if next(filter(lambda x: x['name'] == name, items), None):
+            return {'message': f'item {name} already exists!'}, 400
         try:
             price = request.get_json()['price']
         except KeyError:
