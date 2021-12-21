@@ -2,15 +2,22 @@ import werkzeug.exceptions
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
 import logging
+from flask_jwt import JWT, jwt_required
+from security import authenticate, identity
+
 logging.basicConfig(level=logging.DEBUG)
 
 items = [
 ]
 
 app = Flask(__name__)
+app.secret_key = 'key'
 api = Api(app)
 
+jwt = JWT(app=app, authentication_handler=authenticate, identity_handler=identity)
+
 class Item(Resource):
+    @jwt_required()
     def get(self, name):
         item = filter(lambda x: x['name'] == name, items)
         return next(item, None), 200 if item else 404
