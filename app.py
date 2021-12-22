@@ -1,6 +1,5 @@
-import werkzeug.exceptions
-from flask import Flask, jsonify, request
-from flask_restful import Api, Resource
+from flask import Flask, request
+from flask_restful import Api, Resource, reqparse
 import logging
 from flask_jwt import JWT, jwt_required
 from security import authenticate, identity
@@ -25,11 +24,10 @@ class Item(Resource):
     def post(self, name):
         if next(filter(lambda x: x['name'] == name, items), None):
             return {'message': f'item {name} already exists!'}, 400
-        try:
-            price = request.get_json()['price']
-        except KeyError:
-            return {'status': 'error - no price provided!'}, 400
-        item = {'name': name, 'price': price}
+        parser = reqparse.RequestParser()
+        parser.add_argument('price', required=True, type=float, help='price must be set!')
+        data = parser.parse_args()
+        item = {'name': name, 'price': data['price']}
         items.append(item)
         return item, 201
 
@@ -45,11 +43,10 @@ class Item(Resource):
     def put(self, name):
         item = next(filter(lambda x: x['name'] == name, items), None)
         if item:
-            try:
-                price = request.get_json()['price']
-            except KeyError:
-                return {'status': 'error - no price provided!'}, 400
-            item.update({'name':name, 'price': price})
+            parser = reqparse.RequestParser()
+            parser.add_argument('price', required=True, type=float, help='price must be set!')
+            data = parser.parse_args()
+            item.update({'name': name, 'price': data['price']})
             return item, 201
         else:
             return self.post(name)
