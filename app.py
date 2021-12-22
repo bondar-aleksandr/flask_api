@@ -16,6 +16,13 @@ api = Api(app)
 jwt = JWT(app=app, authentication_handler=authenticate, identity_handler=identity)
 
 class Item(Resource):
+    @staticmethod
+    def _req_parsing():
+        parser = reqparse.RequestParser()
+        parser.add_argument('price', required=True, type=float, help='price must be set!')
+        data = parser.parse_args()
+        return data
+
     def get(self, name):
         item = filter(lambda x: x['name'] == name, items)
         return next(item, None), 200 if item else 404
@@ -24,9 +31,7 @@ class Item(Resource):
     def post(self, name):
         if next(filter(lambda x: x['name'] == name, items), None):
             return {'message': f'item {name} already exists!'}, 400
-        parser = reqparse.RequestParser()
-        parser.add_argument('price', required=True, type=float, help='price must be set!')
-        data = parser.parse_args()
+        data = self._req_parsing()
         item = {'name': name, 'price': data['price']}
         items.append(item)
         return item, 201
@@ -43,9 +48,7 @@ class Item(Resource):
     def put(self, name):
         item = next(filter(lambda x: x['name'] == name, items), None)
         if item:
-            parser = reqparse.RequestParser()
-            parser.add_argument('price', required=True, type=float, help='price must be set!')
-            data = parser.parse_args()
+            data = self._req_parsing()
             item.update({'name': name, 'price': data['price']})
             return item, 201
         else:
