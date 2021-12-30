@@ -1,5 +1,4 @@
-from app import app
-import pytest
+from src.app import app
 import json
 
 
