@@ -1,5 +1,4 @@
 import sqlite3
-import uuid
 
 class Database:
     def __init__(self, dbname):
@@ -20,6 +19,7 @@ class Database:
                 executemany: bool = False,
                 executescript: bool = False
                 ):
+        self.connect_()
         with self.connection as con:
             self.connection: sqlite3.connect
             cur = self.connection.cursor()
@@ -55,6 +55,13 @@ class Database:
         command = open('clear_db.sql').read()
         self.execute(executescript=True, query=command)
 
+    @staticmethod
+    def format_args(sql, parameters: dict):
+        sql += ' and '.join([
+            f'{k}=?' for k in parameters.keys()
+        ])
+        return sql
+
     def add_user(self, login, password):
         query = 'insert into "user" (login, password) values (?,?)'
         try:
@@ -66,10 +73,16 @@ class Database:
         query = 'delete from "user" where "login"=?'
         return self.execute(fetchone=True, query=query, data=(login,))
 
-    def get_user_by_login(self, login):
-        query = 'select * from "user" where "login"=?'
-        return self.execute(fetchone=True, query=query, data=(login,))
-        # return self.execute(fetchone=True)
+    def get_user(self, **kwargs):
+        query = 'select * from "user" where '
+        sql = self.format_args(query, kwargs)
+        params = tuple(kwargs.values())
+        result = None
+        try:
+            result = self.execute(fetchone=True, query=sql,data=params)
+        except sqlite3.OperationalError:
+            print(f'No such colunm!')
+        return result
 
     def get_all_users(self):
         query = 'select * from "user"'
@@ -77,11 +90,13 @@ class Database:
 
 
 if __name__ == '__main__':
-    db = Database('testdb1')
-    db.connect_()
+    db = Database('user.db')
+    #db.connect_()
     db.create_db()
     db.add_user(login='test01', password='pass01')
-    db.delete_user_by_login(login='test01')
-    print(db.get_user_by_login('test01'))
-    print(db.get_all_users())
-    db.clear_db()
+    db.add_user(login='test02', password='pass02')
+    print(db.get_user(id='1', login='test01'))
+    #db.delete_user_by_login(login='test01')
+    #print(db.get_user_by_login('test01'))
+    #print(db.get_all_users())
+    #db.clear_db()

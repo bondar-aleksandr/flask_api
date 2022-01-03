@@ -1,6 +1,7 @@
 from user import User
+from utils import Database
 
-users = [User(1,'bob', 'password')]
+#users = [User(1,'bob', 'password')]
 
 username_mapping = {u.username: u for u in users}
 userid_mapping = {u.id: u for u in users}
