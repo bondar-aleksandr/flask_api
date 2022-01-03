@@ -51,8 +51,9 @@ class Database:
         command = open('create_db.sql').read()
         self.execute(executescript=True, query=command)
 
-    # def clear_db(self):
-    #     command =
+    def clear_db(self):
+        command = open('clear_db.sql').read()
+        self.execute(executescript=True, query=command)
 
     def add_user(self, login, password):
         query = 'insert into "user" (login, password) values (?,?)'
@@ -60,6 +61,10 @@ class Database:
             self.execute(query=query, execute=True, data=(login, password))
         except sqlite3.IntegrityError:
             print(f'user {login} already in DB!')
+
+    def delete_user_by_login(self, login):
+        query = 'delete from "user" where "login"=?'
+        return self.execute(fetchone=True, query=query, data=(login,))
 
     def get_user_by_login(self, login):
         query = 'select * from "user" where "login"=?'
@@ -75,6 +80,8 @@ if __name__ == '__main__':
     db = Database('testdb1')
     db.connect_()
     db.create_db()
-    db.add_user(login='test03', password='pass03')
-    print(db.get_user_by_login('test03'))
+    db.add_user(login='test01', password='pass01')
+    db.delete_user_by_login(login='test01')
+    print(db.get_user_by_login('test01'))
     print(db.get_all_users())
+    db.clear_db()
