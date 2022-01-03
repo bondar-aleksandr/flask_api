@@ -60,7 +60,8 @@ class Database:
         sql += ' and '.join([
             f'{k}=?' for k in parameters.keys()
         ])
-        return sql
+        params = tuple(parameters.values())
+        return sql, params
 
     def add_user(self, login, password):
         query = 'insert into "user" (login, password) values (?,?)'
@@ -69,19 +70,22 @@ class Database:
         except sqlite3.IntegrityError:
             print(f'user {login} already in DB!')
 
-    def delete_user_by_login(self, login):
-        query = 'delete from "user" where "login"=?'
-        return self.execute(fetchone=True, query=query, data=(login,))
+    def delete_user(self, **kwargs):
+        query = 'delete from "user" where '
+        sql, params = self.format_args(query, kwargs)
+        try:
+            self.execute(execute=True, query=sql, data=params)
+        except sqlite3.OperationalError:
+            print(f'No such column!')
 
     def get_user(self, **kwargs):
         query = 'select * from "user" where '
-        sql = self.format_args(query, kwargs)
-        params = tuple(kwargs.values())
+        sql, params = self.format_args(query, kwargs)
         result = None
         try:
             result = self.execute(fetchone=True, query=sql,data=params)
         except sqlite3.OperationalError:
-            print(f'No such colunm!')
+            print(f'No such column!')
         return result
 
     def get_all_users(self):
@@ -96,7 +100,6 @@ if __name__ == '__main__':
     db.add_user(login='test01', password='pass01')
     db.add_user(login='test02', password='pass02')
     print(db.get_user(id='1', login='test01'))
-    #db.delete_user_by_login(login='test01')
-    #print(db.get_user_by_login('test01'))
-    #print(db.get_all_users())
+    db.delete_user(id='2')
+    print(db.get_all_users())
     #db.clear_db()
