@@ -1,9 +1,11 @@
 import sqlite3
+import os
 
 class Database:
     def __init__(self, dbname):
         self.dbname = dbname
-        self.connection = None
+        self.connect_()
+        self.create_tables()
 
     def connect_(self):
         try:
@@ -19,7 +21,6 @@ class Database:
                 executemany: bool = False,
                 executescript: bool = False
                 ):
-        self.connect_()
         with self.connection as con:
             self.connection: sqlite3.connect
             cur = self.connection.cursor()
@@ -47,13 +48,22 @@ class Database:
                 result = cur.fetchall()
                 return result
 
-    def create_db(self):
-        command = open('create_db.sql').read()
-        self.execute(executescript=True, query=command)
+    def create_tables(self):
+        sql = """
+        CREATE TABLE if not exists "user" (
+            "id"	INTEGER UNIQUE,
+            "login"	TEXT UNIQUE,
+            "password"	TEXT,
+            PRIMARY KEY("id" AUTOINCREMENT)
+        );
+        """
+        self.execute(executescript=True, query=sql)
 
     def clear_db(self):
-        command = open('clear_db.sql').read()
-        self.execute(executescript=True, query=command)
+        sql = """
+        delete from "user" where true
+        """
+        self.execute(executescript=True, query=sql)
 
     @staticmethod
     def format_args(sql, parameters: dict):
@@ -71,35 +81,33 @@ class Database:
             print(f'user {login} already in DB!')
 
     def delete_user(self, **kwargs):
-        query = 'delete from "user" where '
-        sql, params = self.format_args(query, kwargs)
+        base_sql = 'delete from "user" where '
+        sql, params = self.format_args(base_sql, kwargs)
         try:
             self.execute(execute=True, query=sql, data=params)
         except sqlite3.OperationalError:
             print(f'No such column!')
 
     def get_user(self, **kwargs):
-        query = 'select * from "user" where '
-        sql, params = self.format_args(query, kwargs)
+        base_sql = 'select * from "user" where '
+        sql, params = self.format_args(base_sql, kwargs)
         result = None
         try:
-            result = self.execute(fetchone=True, query=sql,data=params)
+            result = self.execute(fetchone=True, query=sql, data=params)
         except sqlite3.OperationalError:
             print(f'No such column!')
         return result
 
     def get_all_users(self):
-        query = 'select * from "user"'
-        return self.execute(fetchall=True, query=query)
+        sql = 'select * from "user"'
+        return self.execute(fetchall=True, query=sql)
 
 
 if __name__ == '__main__':
+    print(os.path.dirname(__file__))
     db = Database('user.db')
-    #db.connect_()
-    db.create_db()
+    db.create_tables()
     db.add_user(login='test01', password='pass01')
     db.add_user(login='test02', password='pass02')
     print(db.get_user(id='1', login='test01'))
-    db.delete_user(id='2')
     print(db.get_all_users())
-    #db.clear_db()

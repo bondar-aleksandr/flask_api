@@ -27,7 +27,7 @@ class Item(Resource):
         item = filter(lambda x: x['name'] == name, items)
         return next(item, None), 200 if item else 404
 
-    # @jwt_required()
+    @jwt_required()
     def post(self, name):
         if next(filter(lambda x: x['name'] == name, items), None):
             return {'message': f'item {name} already exists!'}, 400

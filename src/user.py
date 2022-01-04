@@ -1,6 +1,4 @@
-from utils import Database
-
-db = Database('user.db')
+from loader import db
 
 class User:
     def __init__(self, id_, username, password):
@@ -22,9 +20,3 @@ class User:
         result = db.get_user(id=id_)
         if result:
             return cls(*result)
-
-if __name__ == '__main__':
-    user = User.get_user_by_username('test01')
-    print(user)
-    user = User.get_user_by_id('2')
-    print(user)
