@@ -1,11 +1,11 @@
 import sqlite3
-import os
+
+class DbIntegrityError(Exception):
+    pass
 
 class Database:
     def __init__(self, dbname):
         self.dbname = dbname
-        self.connect_()
-        self.create_tables()
 
     def connect_(self):
         try:
@@ -21,6 +21,7 @@ class Database:
                 executemany: bool = False,
                 executescript: bool = False
                 ):
+        self.connect_()
         with self.connection as con:
             self.connection: sqlite3.connect
             cur = self.connection.cursor()
@@ -78,7 +79,7 @@ class Database:
         try:
             self.execute(query=query, execute=True, data=(login, password))
         except sqlite3.IntegrityError:
-            print(f'user {login} already in DB!')
+            raise DbIntegrityError(f'user {login} already in DB!')
 
     def delete_user(self, **kwargs):
         base_sql = 'delete from "user" where '
@@ -104,7 +105,6 @@ class Database:
 
 
 if __name__ == '__main__':
-    print(os.path.dirname(__file__))
     db = Database('user.db')
     db.create_tables()
     db.add_user(login='test01', password='pass01')

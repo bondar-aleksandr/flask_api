@@ -3,6 +3,7 @@ from flask_restful import Api, Resource, reqparse
 import logging
 from flask_jwt import JWT, jwt_required
 from security import authenticate, identity
+from user import UserRegister
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -36,7 +37,7 @@ class Item(Resource):
         items.append(item)
         return item, 201
 
-    # @jwt_required()
+    @jwt_required()
     def delete(self, name):
         global items
         if next(filter(lambda x: x['name'] == name, items), None):
@@ -44,7 +45,7 @@ class Item(Resource):
             return {'message': 'item deleted!'}
         return {'message': 'no such item!'}
 
-    # @jwt_required()
+    @jwt_required()
     def put(self, name):
         item = next(filter(lambda x: x['name'] == name, items), None)
         if item:
@@ -62,6 +63,7 @@ class ItemList(Resource):
 
 api.add_resource(Item, '/item/<string:name>')
 api.add_resource(ItemList, '/items')
+api.add_resource(UserRegister, '/register')
 
 app.config['TESTING'] = True
 app.config['DEBUGING'] = True
