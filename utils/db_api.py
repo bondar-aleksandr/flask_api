@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 
 class DbIntegrityError(Exception):
@@ -57,12 +58,20 @@ class Database:
             "password"	TEXT,
             PRIMARY KEY("id" AUTOINCREMENT)
         );
+        
+        CREATE TABLE if not exists "item" (
+            "id"	INTEGER UNIQUE,
+            "name"	TEXT UNIQUE,
+            "price"	REAL,
+            PRIMARY KEY("id" AUTOINCREMENT)
+        )
         """
         self.execute(executescript=True, query=sql)
 
     def clear_db(self):
         sql = """
-        delete from "user" where true
+        delete from "user" where true;
+        delete from "item" where true
         """
         self.execute(executescript=True, query=sql)
 
@@ -102,6 +111,48 @@ class Database:
     def get_all_users(self):
         sql = 'select * from "user"'
         return self.execute(fetchall=True, query=sql)
+
+    def add_item(self, name, price):
+        sql = 'insert into "item" (name, price) values (?,?)'
+        try:
+            self.execute(execute=True, query=sql, data=(name, price))
+            logging.info(f'Item {name} added to DB!')
+        except sqlite3.IntegrityError:
+            logging.info(f'item {name} already exists in DB!')
+            raise DbIntegrityError(f'item {name} is already in DB!')
+
+    def get_item(self, **kwargs):
+        base_sql = 'select * from "item" where '
+        sql, params = self.format_args(base_sql, kwargs)
+        try:
+            row = self.execute(fetchone=True, query=sql, data=params)
+            if row:
+                return {
+                    'name': row[1],
+                    'price': row[2]
+                }
+            return None
+        except sqlite3.OperationalError:
+            logging.warning(f'Wrong query! {sql}')
+            raise DbIntegrityError('Wrong query!')
+
+    def modify_item(self, name, price):
+        sql = 'replace into "item" (name, price) values (?,?)'
+        self.execute(query=sql, data = (name,price))
+        logging.info(f'item {name} modified in DB!')
+
+    def delete_item(self, **kwargs):
+        base_sql = 'delete from "item" where '
+        sql, params = self.format_args(base_sql, kwargs)
+        try:
+            self.execute(execute=True, query=sql, data=params)
+        except sqlite3.OperationalError:
+            logging.warning(f'Wrong query: {sql}')
+            raise DbIntegrityError('Wrong query!')
+
+    def get_all_items(self):
+        sql = 'select * from item'
+        return self.execute(query=sql, fetchall=True)
 
 
 if __name__ == '__main__':
