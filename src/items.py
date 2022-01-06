@@ -1,8 +1,6 @@
 from flask_jwt import jwt_required
 from flask_restful import Resource, reqparse
 from loader import db
-
-#items = []
 from utils.db_api import DbIntegrityError
 
 
@@ -15,7 +13,10 @@ class Item(Resource):
         return data
 
     def get(self, name):
-        return db.get_item(name=name)
+        item = db.get_item(name=name)
+        if item:
+            return item
+        return {'message': 'no such item!'}
 
     #@jwt_required()
     def post(self, name):
@@ -26,25 +27,20 @@ class Item(Resource):
         except DbIntegrityError:
             return {'message': f'item {name} already exists!'}, 400
 
-    @jwt_required()
+    #@jwt_required()
     def delete(self, name):
-        global items
-        if next(filter(lambda x: x['name'] == name, items), None):
-            items = list(filter(lambda x: x['name'] != name, items))
-            return {'message': 'item deleted!'}
+        if db.get_item(name=name):
+            db.delete_item(name=name)
+            return {'message': f'item {name} deleted!'}, 200
         return {'message': 'no such item!'}
 
-    @jwt_required()
+    #@jwt_required()
     def put(self, name):
-        item = next(filter(lambda x: x['name'] == name, items), None)
-        if item:
-            data = self._req_parsing()
-            item.update({'name': name, 'price': data['price']})
-            return item, 201
-        else:
-            return self.post(name)
+        data = self._req_parsing()
+        db.modify_item(name=name, price=data['price'])
+        return db.get_item(name=name), 201
 
 
 class ItemList(Resource):
     def get(self):
-        return {'items': items}
+        return {'items': db.get_all_items()}

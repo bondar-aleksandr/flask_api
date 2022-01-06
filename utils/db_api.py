@@ -138,7 +138,7 @@ class Database:
 
     def modify_item(self, name, price):
         sql = 'replace into "item" (name, price) values (?,?)'
-        self.execute(query=sql, data = (name,price))
+        self.execute(execute=True, query=sql, data = (name,price))
         logging.info(f'item {name} modified in DB!')
 
     def delete_item(self, **kwargs):
@@ -146,13 +146,15 @@ class Database:
         sql, params = self.format_args(base_sql, kwargs)
         try:
             self.execute(execute=True, query=sql, data=params)
+            logging.info('item deleted from DB!')
         except sqlite3.OperationalError:
             logging.warning(f'Wrong query: {sql}')
             raise DbIntegrityError('Wrong query!')
 
     def get_all_items(self):
         sql = 'select * from item'
-        return self.execute(query=sql, fetchall=True)
+        result = [{'name': row[1], 'price': row[2]} for row in self.execute(query=sql, fetchall=True)]
+        return result
 
 
 if __name__ == '__main__':
