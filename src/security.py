@@ -1,9 +1,12 @@
+import logging
+
 from user import User
 
 
 def authenticate(username, password):
     user = User.get_user_by_username(username)
     if user and user.password == password:
+        logging.info(f'user {user.username} logged in!')
         return user
 
 
