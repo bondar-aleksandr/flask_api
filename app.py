@@ -3,8 +3,7 @@ from flask_restful import Api
 from security import authenticate, identity
 from flask_jwt import JWT
 import logging
-from user import UserRegister
-from items import Item, ItemList
+from resource import Item, ItemList, UserRegister
 
 logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s]  %(message)s',
                     level=logging.INFO,

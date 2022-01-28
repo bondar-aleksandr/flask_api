@@ -1,6 +1,6 @@
 import logging
 
-from user import User
+from model import User
 
 
 def authenticate(username, password):

@@ -39,8 +39,3 @@ class Item(Resource):
         data = self._req_parsing()
         db.modify_item(name=name, price=data['price'])
         return db.get_item(name=name), 201
-
-
-class ItemList(Resource):
-    def get(self):
-        return {'items': db.get_all_items()}
