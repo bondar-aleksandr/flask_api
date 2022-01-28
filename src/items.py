@@ -18,7 +18,7 @@ class Item(Resource):
             return item
         return {'message': 'no such item!'}
 
-    #@jwt_required()
+    @jwt_required()
     def post(self, name):
         data = self._req_parsing()
         try:
@@ -27,14 +27,14 @@ class Item(Resource):
         except DbIntegrityError:
             return {'message': f'item {name} already exists!'}, 400
 
-    #@jwt_required()
+    @jwt_required()
     def delete(self, name):
         if db.get_item(name=name):
             db.delete_item(name=name)
             return {'message': f'item {name} deleted!'}, 200
         return {'message': 'no such item!'}
 
-    #@jwt_required()
+    @jwt_required()
     def put(self, name):
         data = self._req_parsing()
         db.modify_item(name=name, price=data['price'])
