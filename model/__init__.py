@@ -1,3 +1,3 @@
 from .user_model import UserModel
 from .item_model import ItemModel
-from .user_model import UserModel
+from .store_model import StoreModel

@@ -9,6 +9,7 @@ class Item(Resource):
     def _req_parsing():
         parser = reqparse.RequestParser()
         parser.add_argument('price', required=True, type=float, help='price must be set!')
+        parser.add_argument('store_id', required=True, type=int, help='store_id must be set!')
         data = parser.parse_args()
         return data
 
@@ -21,7 +22,7 @@ class Item(Resource):
     @jwt_required()
     def post(self, name):
         data = self._req_parsing()
-        item = ItemModel(name=name, price=data['price'])
+        item = ItemModel(name=name, price=data['price'], store_id=data['store_id'])
         try:
             item.save_to_db()
             return item.json()
@@ -44,6 +45,11 @@ class Item(Resource):
             item.price = data['price']
             item.save_to_db()
             return item.json(), 201
-        item = ItemModel(name, data['price'])
+        item = ItemModel(name, data['price'], data['store_id'])
         item.save_to_db()
         return item.json(), 201
+
+
+class ItemList(Resource):
+    def get(self):
+        return {'items': [item.json() for item in ItemModel.query.all()]}
