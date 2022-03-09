@@ -1,7 +1,7 @@
 from flask_restful import Resource
-from loader import db
+from model import ItemModel
 
 
 class ItemList(Resource):
     def get(self):
-        return {'items': db.get_all_items()}
+        return {'items': [item.json() for item in ItemModel.query.all()]}

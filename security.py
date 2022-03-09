@@ -1,10 +1,10 @@
 import logging
 
-from model import User
+from model import UserModel
 
 
 def authenticate(username, password):
-    user = User.get_user_by_username(username)
+    user = UserModel.get_user_by_username(username)
     if user and user.password == password:
         logging.info(f'user {user.username} logged in!')
         return user
@@ -12,4 +12,4 @@ def authenticate(username, password):
 
 def identity(payload):
     user_id = payload['identity']
-    return User.get_user_by_id(user_id)
+    return UserModel.get_user_by_id(user_id)

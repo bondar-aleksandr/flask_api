@@ -1,7 +1,7 @@
+import sqlalchemy
 from flask_jwt import jwt_required
 from flask_restful import Resource, reqparse
-from loader import db
-from utils.db_api import DbIntegrityError
+from model import ItemModel
 
 
 class Item(Resource):
@@ -13,29 +13,37 @@ class Item(Resource):
         return data
 
     def get(self, name):
-        item = db.get_item(name=name)
+        item = ItemModel.find_by_name(name)
         if item:
-            return item
+            return item.json()
         return {'message': 'no such item!'}
 
     @jwt_required()
     def post(self, name):
         data = self._req_parsing()
+        item = ItemModel(name=name, price=data['price'])
         try:
-            db.add_item(name=name, price=data['price'])
-            return db.get_item(name=name), 201
-        except DbIntegrityError:
+            item.save_to_db()
+            return item.json()
+        except sqlalchemy.exc.IntegrityError:
             return {'message': f'item {name} already exists!'}, 400
 
     @jwt_required()
     def delete(self, name):
-        if db.get_item(name=name):
-            db.delete_item(name=name)
+        item = ItemModel.find_by_name(name=name)
+        if item:
+            item.delete_from_db()
             return {'message': f'item {name} deleted!'}, 200
         return {'message': 'no such item!'}
 
     @jwt_required()
     def put(self, name):
         data = self._req_parsing()
-        db.modify_item(name=name, price=data['price'])
-        return db.get_item(name=name), 201
+        item = ItemModel.find_by_name(name=name)
+        if item:
+            item.price = data['price']
+            item.save_to_db()
+            return item.json(), 201
+        item = ItemModel(name, data['price'])
+        item.save_to_db()
+        return item.json(), 201
