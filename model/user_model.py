@@ -14,6 +14,9 @@ class UserModel(dbase.Model):
     def __repr__(self):
         return f'user: "{self.username}", id: "{self.id}"'
 
+    def json(self):
+        return {'id': self.id, 'username': self.username}
+
     @classmethod
     def get_user_by_username(cls, username):
         return cls.query.filter_by(username=username).first()
@@ -24,4 +27,8 @@ class UserModel(dbase.Model):
 
     def save_to_db(self):
         dbase.session.add(self)
+        dbase.session.commit()
+
+    def delete_from_db(self):
+        dbase.session.delete(self)
         dbase.session.commit()

@@ -15,6 +15,10 @@ class ItemModel(dbase.Model):
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
 
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
     def __init__(self, name, price, store_id):
         self.name = name
         self.price = price

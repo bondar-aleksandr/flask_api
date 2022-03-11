@@ -15,6 +15,10 @@ class StoreModel(dbase.Model):
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
 
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
     def __repr__(self):
         return f'store name: {self.name}'
 
