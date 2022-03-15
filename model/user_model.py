@@ -1,3 +1,4 @@
+from datetime import datetime
 from loader import dbase
 
 
@@ -6,16 +7,19 @@ class UserModel(dbase.Model):
     id = dbase.Column(dbase.Integer, primary_key=True)
     username = dbase.Column(dbase.String(80), unique = True)
     password = dbase.Column(dbase.String(80))
+    role = dbase.Column(dbase.String(80), nullable = False, default = 'ro')
+    created = dbase.Column(dbase.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, role):
         self.username = username
         self.password = password
+        self.role = role
 
     def __repr__(self):
         return f'user: "{self.username}", id: "{self.id}"'
 
     def json(self):
-        return {'id': self.id, 'username': self.username}
+        return {'id': self.id, 'username': self.username, 'role': self.role}
 
     @classmethod
     def get_user_by_username(cls, username):

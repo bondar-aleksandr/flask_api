@@ -1,6 +1,9 @@
 import sqlalchemy
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
+from flask_jwt_extended import jwt_required
 from model import StoreModel
+from .decorators import admin_required
+
 
 class Store(Resource):
     def get(self, name):
@@ -9,6 +12,8 @@ class Store(Resource):
             return store.json()
         return {'message': 'no such store'}, 404
 
+    @jwt_required()
+    @admin_required
     def post(self, name):
         store = StoreModel(name)
         try:
@@ -17,7 +22,8 @@ class Store(Resource):
         except sqlalchemy.exc.IntegrityError:
             return {'message': f'item {name} already exists!'}, 400
 
-
+    @jwt_required()
+    @admin_required
     def delete(self, name):
         store = StoreModel.find_by_name(name)
         if store:

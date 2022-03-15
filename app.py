@@ -2,6 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 import logging
+
 from resource import Item, ItemList, UserRegister, Store, StoreList, User, UserLogin
 from loader import dbase
 
@@ -34,7 +35,6 @@ jwt = JWTManager(app)
 @app.before_first_request
 def create_tables():
     dbase.create_all()
-
 
 if __name__ == '__main__':
     dbase.init_app(app)
