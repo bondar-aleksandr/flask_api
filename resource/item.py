@@ -2,7 +2,7 @@ import sqlalchemy
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource, reqparse
 from model import ItemModel
-from .decorators import admin_required
+from .decorators import admin_required, log_user
 
 
 class Item(Resource):
@@ -22,6 +22,7 @@ class Item(Resource):
 
     @jwt_required()
     @admin_required
+    @log_user
     def post(self, name):
         data = self._req_parsing()
         item = ItemModel(name=name, price=data['price'], store_id=data['store_id'])
@@ -33,6 +34,7 @@ class Item(Resource):
 
     @jwt_required()
     @admin_required
+    @log_user
     def delete(self, name):
         item = ItemModel.find_by_name(name=name)
         if item:
@@ -42,6 +44,7 @@ class Item(Resource):
 
     @jwt_required()
     @admin_required
+    @log_user
     def put(self, name):
         data = self._req_parsing()
         item = ItemModel.find_by_name(name=name)

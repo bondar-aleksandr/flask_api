@@ -2,8 +2,8 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 import logging
-
 from resource import Item, ItemList, UserRegister, Store, StoreList, User, UserLogin
+from model import UserModel
 from loader import dbase
 
 logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s]  %(message)s',
@@ -29,8 +29,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dbase.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['JWT_SECRET_KEY'] = 'P@$$w0rd'
+app.config['JWT_BLACKLIST_ENABLED'] = True
+app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
 jwt = JWTManager(app)
+
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data["sub"]
+    return UserModel.get_user_by_id(identity)
 
 @app.before_first_request
 def create_tables():

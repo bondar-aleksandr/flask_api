@@ -2,7 +2,7 @@ import sqlalchemy
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from model import StoreModel
-from .decorators import admin_required
+from .decorators import admin_required, log_user
 
 
 class Store(Resource):
@@ -14,6 +14,7 @@ class Store(Resource):
 
     @jwt_required()
     @admin_required
+    @log_user
     def post(self, name):
         store = StoreModel(name)
         try:
@@ -24,6 +25,7 @@ class Store(Resource):
 
     @jwt_required()
     @admin_required
+    @log_user
     def delete(self, name):
         store = StoreModel.find_by_name(name)
         if store:

@@ -2,6 +2,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 from flask_restful import Resource, reqparse
 from model import UserModel
 from .decorators import admin_required
+import logging
 
 _user_parser = reqparse.RequestParser()
 _user_parser.add_argument('username', required=True, type=str, help='username value must be set!')
@@ -52,6 +53,7 @@ class UserLogin(Resource):
                 additional_claims = {'is admin': False}
             access_token = create_access_token(identity=user.id, fresh=True, additional_claims=additional_claims)
             refresh_token = create_refresh_token(user.id)
+            logging.info(f'user: {user.username} logged in!')
             return {
                 'access_token': access_token,
                 'refresh_token': refresh_token,
