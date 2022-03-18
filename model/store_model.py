@@ -6,7 +6,7 @@ class StoreModel(dbase.Model):
     id = dbase.Column(dbase.Integer, primary_key=True)
     name = dbase.Column(dbase.String(80), unique=True)
     created = dbase.Column(dbase.DateTime, nullable=False, default=datetime.utcnow)
-    items = dbase.relationship('ItemModel', lazy='dynamic')
+    items = dbase.relationship('ItemModel', back_populates='store', lazy='dynamic')
 
     def __init__(self, name):
         self.name = name

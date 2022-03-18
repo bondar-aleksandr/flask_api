@@ -15,6 +15,6 @@ def log_user(func):
     def wrapper(*args, **kwargs):
         user = current_user
         func_name = func.__name__
-        logging.info(f'current user: {user.username}, method: {func_name}')
+        logging.info(f'current user: {user.username}, accessed method: {func_name}')
         return func(*args, **kwargs)
     return wrapper

@@ -1,3 +1,5 @@
+from flask_jwt_extended import current_user
+
 from loader import dbase
 from datetime import datetime
 
@@ -8,8 +10,10 @@ class ItemModel(dbase.Model):
     name = dbase.Column(dbase.String(80), unique = True)
     price = dbase.Column(dbase.Float)
     created = dbase.Column(dbase.DateTime, nullable = False, default = datetime.utcnow)
+    modified = dbase.Column(dbase.DateTime, nullable=False, default=datetime.utcnow)
     store_id = dbase.Column(dbase.Integer, dbase.ForeignKey('store.id'))
-    store = dbase.relationship('StoreModel')
+    modified_by = dbase.Column(dbase.Integer, dbase.ForeignKey('user.id'))
+    store = dbase.relationship('StoreModel', back_populates='items')
 
     @classmethod
     def find_by_name(cls, name):
@@ -28,9 +32,11 @@ class ItemModel(dbase.Model):
         return f'item name: {self.name}, item price: {self.price}'
 
     def json(self):
-        return {"name": self.name, "price": self.price}
+        return {"name": self.name, "price": self.price, "store": self.store.name}
 
     def save_to_db(self):
+        self.modified_by = current_user.id
+        self.modified = datetime.utcnow()
         dbase.session.add(self)
         dbase.session.commit()
 
