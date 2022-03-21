@@ -11,15 +11,17 @@ _user_parser.add_argument('role', required = False, type=str, help='user role sh
 
 
 class User(Resource):
-    def get(self, user_id):
+    @classmethod
+    def get(cls, user_id):
         user = UserModel.get_user_by_id(id_=user_id)
         if not user:
             return {'message': 'no user found!'}, 404
         return user.json()
 
+    @classmethod
     @jwt_required()
     @admin_required
-    def delete(self, user_id):
+    def delete(cls, user_id):
         user = UserModel.get_user_by_id(id_=user_id)
         if not user:
             return {'message': 'no user found!'}, 404
@@ -28,9 +30,10 @@ class User(Resource):
 
 
 class UserRegister(Resource):
+    @classmethod
     @jwt_required()
     @admin_required
-    def post(self):
+    def post(cls):
         data = _user_parser.parse_args()
         username = data['username']
         password = data['password']
@@ -43,7 +46,8 @@ class UserRegister(Resource):
 
 
 class UserLogin(Resource):
-    def post(self):
+    @classmethod
+    def post(cls):
         data = _user_parser.parse_args()
         user = UserModel.get_user_by_username(data['username'])
         if user and user.password == data['password']:
